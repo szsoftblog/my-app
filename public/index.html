@@ -1,43 +1,298 @@
+
+
+
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>赛龙舟答题活动</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .message {
+      margin-top: 20px;
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .carousel-inner {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            display: block;
+        }
+
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .carousel-control.prev {
+            left: 10px;
+        }
+
+        .carousel-control.next {
+            right: 10px;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+        }
+
+        .carousel-indicators span {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .carousel-indicators span.active {
+            background-color: white;
+        }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>赛龙舟答题活动</h1>
+
+  <div class="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item">
+        <img src="/img/1.png" style="height: 250px;" alt="Slide 1">
+      </div>
+      <div class="carousel-item">
+        <img src="/img/2.png" style="height: 250px;" alt="Slide 2">
+      </div>
+      <div class="carousel-item">
+        <img src="/img/3.png" style="height: 250px;" alt="Slide 3">
+      </div>
+    </div>
+    <!--<button class="carousel-control prev" onclick="prevSlide()">&#10094;</button>
+    <button class="carousel-control next" onclick="nextSlide()">&#10095;</button>-->
+    <div class="carousel-indicators">
+      <span class="active" onclick="goToSlide(0)"></span>
+      <span onclick="goToSlide(1)"></span>
+      <span onclick="goToSlide(2)"></span>
+    </div>
+  </div>
+
+  <!-- 答题部分 -->
+  <div id="quiz-section">
+    <div id="questions">
+      <!-- 题目动态生成 -->
+    </div>
+    <button onclick="submitAnswers()">提交答案</button>
+    <p id="quiz-message" class="message"></p>
+  </div>
+
+  <!-- 核销部分 -->
+  <div id="redeem-section" style="display: none;">
+    <p>您的券码：<span id="voucher-code"></span></p>
+    <!--<input type="text" id="redeem-input" placeholder="请输入券码进行核销">
+    <button onclick="redeemVoucher()">核销券码</button>-->
+    <p id="redeem-message" class="message"></p>
+  </div>
+</div>
+
+<script>
+    let currentIndex = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    const indicators = document.querySelectorAll('.carousel-indicators span');
+
+    function showSlide(index) {
+        const carouselInner = document.querySelector('.carousel-inner');
+        const offset = -index * 100;
+        carouselInner.style.transform = `translateX(${offset}%)`;
+
+        indicators.forEach((indicator, i) => {
+            indicator.classList.toggle('active', i === index);
+        });
+    }
+
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % slides.length;
+        showSlide(currentIndex);
+    }
+
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        showSlide(currentIndex);
+    }
+
+    function goToSlide(index) {
+        currentIndex = index;
+        showSlide(currentIndex);
+    }
+
+    // 自动轮播
+    setInterval(nextSlide, 3000);
+
+    // 初始化
+    const voucherKey = "voucherCode";
+<!--    const questions = [-->
+<!--      { question: "1 + 1 等于多少？", answer: "2" },-->
+<!--      { question: "中国的首都是哪里？", answer: "北京" },-->
+<!--      { question: "太阳从哪个方向升起？", answer: "东" },-->
+<!--      { question: "HTML 是什么的缩写？", answer: "超文本标记语言" },-->
+<!--      { question: "JavaScript 是一种什么类型的语言？", answer: "脚本语言" }-->
+<!--    ];-->
+    // 题目数据
+const questions = [
+    {
+        question: "端午节是为了纪念哪位历史人物？",
+        options: ["A  屈原", "B  孔子", "C  秦始皇"],
+        answer: "A"
+    },
+    {
+        question: "以下哪种不是端午习俗？",
+        options: ["A  赛龙舟", "B  吃粽子", "C  赏月"],
+        answer: "C"
+    },
+    {
+        question: "端午节的农历日期是？",
+        options: ["A 七月初五", "B 五月初五", "C 五月十五"],
+        answer: "B"
+    },
+    {
+        question: "最早的粽子口味是？",
+        options: ["A 甜", "B 辣", "C 苦"],
+        answer: "C"
+    },
+    {
+        question: "赛龙舟习俗的起源时期是？",
+        options: "A 春秋时期  B 秦朝  C 明朝",
+        answer: "A"
+    }
+];
+
+    // 检查是否已有券码
+    const storedVoucher = localStorage.getItem(voucherKey);
+    if (storedVoucher) {
+      showRedeemSection(storedVoucher);
+    } else {
+      renderQuestions();
+    }
+
+    // 渲染题目
+    function renderQuestions() {
+      const questionsContainer = document.getElementById("questions");
+      questions.forEach((q, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `
+          <p>${index + 1}. ${q.question}</p>
+          <p>${q.options}</p>
+          <input type="text" id="answer-${index}" placeholder="请输入答案">
+        `;
+        questionsContainer.appendChild(div);
+      });
+    }
+
+    // 提交答案
+    function submitAnswers() {
+      let allCorrect = true;
+      const quizMessage = document.getElementById("quiz-message");
+
+      questions.forEach((q, index) => {
+        const userAnswer = document.getElementById(`answer-${index}`).value.trim();
+        if (userAnswer !== q.answer) {
+          allCorrect = false;
+        }
+      });
+
+      if (allCorrect) {
+        const voucherCode = generateVoucherCode();
+        localStorage.setItem(voucherKey, voucherCode);
+        quizMessage.textContent = "恭喜！全部答对，券码已派发。";
+        showRedeemSection(voucherCode);
+      } else {
+        quizMessage.textContent = "答案错误，请重试！";
+        quizMessage.classList.add("error");
+      }
+    }
+
+    // 显示核销部分
+    function showRedeemSection(voucherCode) {
+      document.getElementById("quiz-section").style.display = "none";
+      document.getElementById("redeem-section").style.display = "block";
+      document.getElementById("voucher-code").textContent = voucherCode;
+    }
+
+    // 核销券码
+    function redeemVoucher() {
+      const inputCode = document.getElementById("redeem-input").value.trim();
+      const storedCode = localStorage.getItem(voucherKey);
+      const redeemMessage = document.getElementById("redeem-message");
+
+      if (inputCode === storedCode) {
+        redeemMessage.textContent = "券码核销成功！";
+        localStorage.removeItem(voucherKey);
+      } else {
+        redeemMessage.textContent = "券码无效，请检查后重试！";
+        redeemMessage.classList.add("error");
+      }
+    }
+
+    // 生成券码
+    function generateVoucherCode() {
+      return "VC-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+  </script>
+</body>
 </html>
